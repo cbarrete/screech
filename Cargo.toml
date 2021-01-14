@@ -1,0 +1,5 @@
+[package]
+name = "screech"
+version = "0.1.0"
+authors = ["Cédric Barreteau"]
+edition = "2018"

@@ -8,3 +8,5 @@ pub mod distort;
 pub use crate::distort::*;
 pub mod gain;
 pub use crate::gain::*;
+pub mod pitch;
+pub use crate::pitch::*;

@@ -1,7 +1,7 @@
 use std::env::args;
 use std::fs::File;
 use std::process::exit;
-use screech::{AudioBuffer, Distort, Gain, read_wav, write_wav};
+use screech::{AudioBuffer, Distort, Gain, Pitch, read_wav, write_wav};
 
 #[derive(Debug)]
 enum CliError {
@@ -78,6 +78,13 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             }
             audio_buffer = audio_buffer.decimate(option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
+        } else if "-delaypitch".starts_with(&option_arguments[0]) {
+            if option_arguments.len() < 2 {
+                return Err(CliError::Arguments(String::from("delaypitch takes a decimal factor parameter")));
+            }
+            let factor = option_arguments[1].parse::<f32>()?;
+            audio_buffer = run(|ab: AudioBuffer| ab.delay_pitch(factor), audio_buffer, iterations);
+            option_arguments = &option_arguments[2..];
         } else if "-gain".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from("gain takes a decimal gain parameter")));
@@ -103,6 +110,7 @@ available options:
   -hardclip <threshold>
   -softclip <amount>
   -decimate <depth>
+  -delaypitch <factor>
   -gain <gain>
   -normalize
 

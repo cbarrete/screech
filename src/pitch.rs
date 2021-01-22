@@ -51,8 +51,32 @@ impl Pitch for AudioBuffer {
         self
     }
 
-    fn speed(self, speed: f32) -> AudioBuffer {
-        // only allocate if slower
-        todo!()
+    fn speed(mut self, speed: f32) -> AudioBuffer {
+        if speed == 1.0 {
+            return self
+        }
+
+        if speed > 1.0 {
+            let channels = self.metadata.channels as usize;
+            let new_len = (self.data.len() as f32 / speed) as usize;
+            let samples_per_channel = self.data.len() / channels;
+
+            for channel in 0..channels {
+                let mut read: f32 = 0.0;
+                for i in 0..(samples_per_channel as f32 / speed) as usize {
+                    let first = read.floor();
+                    let second = read.ceil();
+                    let ratio = read - first;
+                    self.data[channel + i * channels] = self.data[channel + first  as usize * channels] * ratio
+                                                      + self.data[channel + second as usize * channels] * (1.0 - ratio);
+                    read += speed;
+                }
+            }
+            self.data.resize(new_len, 0.0);
+        } else {
+            todo!("slowing down is not supported yet")
+        }
+
+        self
     }
 }

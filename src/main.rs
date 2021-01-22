@@ -85,6 +85,13 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             let factor = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.delay_pitch(factor), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
+        } else if "-speed".starts_with(&option_arguments[0]) {
+            if option_arguments.len() < 2 {
+                return Err(CliError::Arguments(String::from("speed takes a decimal speed parameter")));
+            }
+            let speed = option_arguments[1].parse::<f32>()?;
+            audio_buffer = run(|ab: AudioBuffer| ab.speed(speed), audio_buffer, iterations);
+            option_arguments = &option_arguments[2..];
         } else if "-gain".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from("gain takes a decimal gain parameter")));
@@ -111,6 +118,7 @@ available options:
   -softclip <amount>
   -decimate <depth>
   -delaypitch <factor>
+  -speed <speed>
   -gain <gain>
   -normalize
 

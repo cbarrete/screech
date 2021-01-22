@@ -59,11 +59,11 @@ impl Pitch for AudioBuffer {
         if speed > 1.0 {
             let channels = self.metadata.channels as usize;
             let new_len = (self.data.len() as f32 / speed) as usize;
-            let samples_per_channel = self.data.len() / channels;
+            let samples_per_channel = new_len / channels;
 
             for channel in 0..channels {
                 let mut read: f32 = 0.0;
-                for i in 0..(samples_per_channel as f32 / speed) as usize {
+                for i in 0..samples_per_channel {
                     let first = read.floor();
                     let second = read.ceil();
                     let ratio = read - first;

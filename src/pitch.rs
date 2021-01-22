@@ -56,11 +56,11 @@ impl Pitch for AudioBuffer {
             return self
         }
 
-        if speed > 1.0 {
-            let channels = self.metadata.channels as usize;
-            let new_len = (self.data.len() as f32 / speed) as usize;
-            let samples_per_channel = new_len / channels;
+        let channels = self.metadata.channels as usize;
+        let new_len = (self.data.len() as f32 / speed) as usize;
+        let samples_per_channel = new_len / channels;
 
+        if speed > 1.0 {
             for channel in 0..channels {
                 let mut read: f32 = 0.0;
                 for i in 0..samples_per_channel {
@@ -74,7 +74,19 @@ impl Pitch for AudioBuffer {
             }
             self.data.resize(new_len, 0.0);
         } else {
-            todo!("slowing down is not supported yet")
+            let mut buffer = vec![1.0; new_len];
+            for channel in 0..channels {
+                let mut read: f32 = 0.0;
+                for i in 0..samples_per_channel {
+                    let first = read.floor();
+                    let second = read.ceil();
+                    let ratio = read - first;
+                    buffer[channel + i * channels] = self.data[channel + first  as usize * channels] * ratio
+                                                   + self.data[channel + second as usize * channels] * (1.0 - ratio);
+                    read += speed;
+                }
+            }
+            self.data = buffer;
         }
 
         self

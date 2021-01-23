@@ -1,21 +1,28 @@
 use crate::types::*;
 
 pub trait Pitch {
-    fn delay_pitch(self, factor: f32) -> Self;
+    fn delay_pitch(self, factor: f32, log_size: u8) -> Self;
     fn speed(self, speed: f32) -> Self;
 }
 
 impl Pitch for AudioBuffer {
-    fn delay_pitch(mut self, factor: f32) -> Self {
-        // TODO might want to parametrize the size and make it a power of 2 to use masks
+    fn delay_pitch(mut self, factor: f32, log_size: u8) -> Self {
         if factor == 1.0 {
             return self
         }
 
-        let buffer_size = std::cmp::min((self.metadata.sample_rate / 4) as usize, self.data.len());
-        let mut buffer = vec![0.0; buffer_size];
         let channels = self.metadata.channels as usize;
         let samples_per_channel = self.data.len() / channels;
+
+        let data_len = self.data.len();
+        let data_len_bounded_size = if data_len.is_power_of_two() {
+            data_len
+        } else {
+            1 + (usize::MAX >> data_len.leading_zeros() + 1)
+        };
+        let buffer_size = std::cmp::min(2usize.pow(log_size as u32), data_len_bounded_size) / channels;
+        let buffer_mask = buffer_size - 1;
+        let mut buffer = vec![0.0; buffer_size];
 
         for channel in 0..channels {
             if factor > 1.0 {
@@ -31,14 +38,12 @@ impl Pitch for AudioBuffer {
                 buffer[write] = self.data[channel + i * channels];
 
                 write += 1;
-                if write == buffer_size {
-                    write = 0;
-                }
+                write &= buffer_mask;
 
                 let first = read.floor();
                 let second = read.ceil();
                 let ratio = read - first;
-                self.data[channel + i * channels] = buffer[first as usize] * ratio + buffer[second as usize % buffer_size] * (1.0 - ratio);
+                self.data[channel + i * channels] = buffer[first as usize] * ratio + buffer[second as usize & buffer_mask] * (1.0 - ratio);
 
                 read += factor;
 

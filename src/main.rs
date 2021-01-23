@@ -51,7 +51,7 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             option_arguments = &option_arguments[1..];
         } else if "-fractalize".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("fractalize takes an integral depth parameter")));
+                return Err(CliError::Arguments(String::from("fractalize takes an integral depth")));
             }
             let depth = option_arguments[1].parse::<u32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.fractalize(depth), audio_buffer, iterations);
@@ -61,33 +61,34 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             option_arguments = &option_arguments[1..];
         } else if "-hardclip".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("hardclip takes a decimal threshold parameter")));
+                return Err(CliError::Arguments(String::from("hardclip takes a decimal threshold")));
             }
             audio_buffer = audio_buffer.hard_clip(option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
         } else if "-softclip".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("softclip takes a decimal amount parameter")));
+                return Err(CliError::Arguments(String::from("softclip takes a decimal amount")));
             }
             let amount = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.soft_clip(amount), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
         } else if "-decimate".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("decimate takes a decimal depth parameter")));
+                return Err(CliError::Arguments(String::from("decimate takes a decimal depth")));
             }
             audio_buffer = audio_buffer.decimate(option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
         } else if "-delaypitch".starts_with(&option_arguments[0]) {
-            if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("delaypitch takes a decimal factor parameter")));
+            if option_arguments.len() < 3 {
+                return Err(CliError::Arguments(String::from("delaypitch takes a decimal factor and an integer size")));
             }
             let factor = option_arguments[1].parse::<f32>()?;
-            audio_buffer = run(|ab: AudioBuffer| ab.delay_pitch(factor), audio_buffer, iterations);
-            option_arguments = &option_arguments[2..];
+            let size = option_arguments[2].parse::<u8>()?;
+            audio_buffer = run(|ab: AudioBuffer| ab.delay_pitch(factor, size), audio_buffer, iterations);
+            option_arguments = &option_arguments[3..];
         } else if "-speed".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("speed takes a decimal speed parameter")));
+                return Err(CliError::Arguments(String::from("speed takes a decimal speed")));
             }
             let speed = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.speed(speed), audio_buffer, iterations);
@@ -97,7 +98,7 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             option_arguments = &option_arguments[1..];
         } else if "-gain".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("gain takes a decimal gain parameter")));
+                return Err(CliError::Arguments(String::from("gain takes a decimal gain")));
             }
             let gain = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.gain(gain), audio_buffer, iterations);
@@ -120,7 +121,7 @@ available options:
   -hardclip <threshold>
   -softclip <amount>
   -decimate <depth>
-  -delaypitch <factor>
+  -delaypitch <factor> <size>
   -speed <speed>
   -gain <gain>
   -normalize

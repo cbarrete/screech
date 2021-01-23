@@ -7,6 +7,7 @@ pub trait Distort {
     fn soft_clip(self, amount: f32) -> Self;
     fn fractalize(&self, depth: u32) -> Self;
     fn interpolate(&self) -> Self;
+    fn expand(self) -> Self;
 }
 
 impl Distort for AudioBuffer {
@@ -72,6 +73,35 @@ impl Distort for AudioBuffer {
             .map(|c| interpolate_channel(c))
             .collect();
         from_channels(&frac_chans, self.metadata.sample_rate)
+    }
+
+    fn expand(mut self) -> Self {
+        let chs = self.metadata.channels as usize;
+        let spc = self.data.len() / chs;
+        for ch in 0..chs {
+            let mut cycle_end = 0;
+            let mut cycle_beg = 0;
+            while cycle_end < spc {
+                // go over the next pseudo-cycle
+                while cycle_end < spc && self.data[ch + chs * cycle_end] >= 0. { cycle_end += 1 }
+                while cycle_end < spc && self.data[ch + chs * cycle_end] <= 0. { cycle_end += 1 }
+
+                let mut max = 0.;
+                for i in cycle_beg..cycle_end {
+                    let current = self.data[ch + i * chs].abs();
+                    if current > max {
+                        max = current;
+                    }
+                }
+
+                for i in cycle_beg..cycle_end {
+                    self.data[ch + i * chs] /= max;
+                }
+
+                cycle_beg = cycle_end;
+            }
+        }
+        self
     }
 }
 

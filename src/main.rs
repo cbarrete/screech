@@ -92,6 +92,9 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             let speed = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.speed(speed), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
+        } else if "-expand".starts_with(&option_arguments[0]) {
+            audio_buffer = audio_buffer.expand();
+            option_arguments = &option_arguments[1..];
         } else if "-gain".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from("gain takes a decimal gain parameter")));

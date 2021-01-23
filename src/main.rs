@@ -110,6 +110,9 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             let gain = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.dc(gain), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
+        } else if "-removedc".starts_with(&option_arguments[0]) {
+            audio_buffer = audio_buffer.remove_dc();
+            option_arguments = &option_arguments[1..];
         } else if "-normalize".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.normalize();
             option_arguments = &option_arguments[1..];
@@ -133,6 +136,7 @@ available options:
   -expand
   -gain <gain>
   -dc <gain>
+  -removedc
   -normalize
 
 short versions are tried in that order";

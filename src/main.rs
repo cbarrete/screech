@@ -105,10 +105,10 @@ fn do_main(in_filename: &str, out_filename: &String, mut option_arguments: &[Str
             option_arguments = &option_arguments[2..];
         } else if "-dc".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
-                return Err(CliError::Arguments(String::from("dc takes a decimal gain")));
+                return Err(CliError::Arguments(String::from("dc takes a decimal dc")));
             }
-            let gain = option_arguments[1].parse::<f32>()?;
-            audio_buffer = run(|ab: AudioBuffer| ab.dc(gain), audio_buffer, iterations);
+            let dc = option_arguments[1].parse::<f32>()?;
+            audio_buffer = run(|ab: AudioBuffer| ab.dc(dc), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
         } else if "-removedc".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.remove_dc();
@@ -135,7 +135,7 @@ available options:
   -speed <speed>
   -expand
   -gain <gain>
-  -dc <gain>
+  -dc <dc>
   -removedc
   -normalize
 

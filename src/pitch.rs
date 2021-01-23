@@ -1,12 +1,12 @@
 use crate::types::*;
 
 pub trait Pitch {
-    fn delay_pitch(self, factor: f32) -> AudioBuffer;
-    fn speed(self, speed: f32) -> AudioBuffer;
+    fn delay_pitch(self, factor: f32) -> Self;
+    fn speed(self, speed: f32) -> Self;
 }
 
 impl Pitch for AudioBuffer {
-    fn delay_pitch(mut self, factor: f32) -> AudioBuffer {
+    fn delay_pitch(mut self, factor: f32) -> Self {
         // TODO might want to parametrize the size and make it a power of 2 to use masks
         if factor == 1.0 {
             return self
@@ -51,7 +51,7 @@ impl Pitch for AudioBuffer {
         self
     }
 
-    fn speed(mut self, speed: f32) -> AudioBuffer {
+    fn speed(mut self, speed: f32) -> Self {
         if speed == 1.0 {
             return self
         }

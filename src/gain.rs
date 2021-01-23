@@ -2,6 +2,7 @@ use crate::types::*;
 
 pub trait Gain {
     fn gain(self, gain: f32) -> Self;
+    fn dc(self, gain: f32) -> Self;
     fn normalize(self) -> Self;
 }
 
@@ -9,6 +10,13 @@ impl Gain for AudioBuffer {
     fn gain(mut self, gain: f32) -> Self {
         for s in &mut self.data {
             *s *= gain;
+        }
+        self
+    }
+
+    fn dc(mut self, gain: f32) -> Self {
+        for s in &mut self.data {
+            *s += gain;
         }
         self
     }

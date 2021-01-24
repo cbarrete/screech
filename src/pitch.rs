@@ -78,6 +78,7 @@ impl Pitch for AudioBuffer {
                 }
             }
             self.data.resize(new_len, 0.0);
+            self.data.shrink_to_fit();
         } else {
             let mut buffer = vec![1.0; new_len];
             for channel in 0..channels {

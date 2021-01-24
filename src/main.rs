@@ -73,6 +73,13 @@ fn do_main(
         } else if "-expand".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.expand();
             option_arguments = &option_arguments[1..];
+        } else if "-reversepseudocycles".starts_with(&option_arguments[0]) {
+            audio_buffer = run(
+                |ab: AudioBuffer| ab.reverse_pseudo_cycles(),
+                audio_buffer,
+                iterations,
+            );
+            option_arguments = &option_arguments[1..];
         } else if "-fold".starts_with(&option_arguments[0]) {
             audio_buffer = run(|ab: AudioBuffer| ab.fold(), audio_buffer, iterations);
             option_arguments = &option_arguments[1..];
@@ -165,6 +172,7 @@ available options:
   -interpolate
   -fractalize <depth>
   -expand
+  -reversepseudocycles
   -fold
   -hardclip <threshold>
   -softclip <amount>

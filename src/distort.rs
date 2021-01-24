@@ -8,6 +8,7 @@ pub trait Distort {
     fn fractalize(&self, depth: u32) -> Self;
     fn interpolate(&self) -> Self;
     fn expand(self) -> Self;
+    fn reverse_pseudo_cycles(self) -> Self;
 }
 
 impl Distort for AudioBuffer {
@@ -117,6 +118,43 @@ impl Distort for AudioBuffer {
                 cycle_beg = cycle_end;
             }
         }
+        self
+    }
+
+    fn reverse_pseudo_cycles(mut self) -> Self {
+        let chs = self.metadata.channels as usize;
+        let spc = self.data.len() / chs;
+
+        let mut buffer = Vec::new();
+
+        for ch in 0..chs {
+            let mut cycle_end = 0;
+            let mut cycle_beg = 0;
+
+            while cycle_end < spc {
+                // go over the next pseudo-cycle
+                while cycle_end < spc && self.data[ch + chs * cycle_end] >= 0. {
+                    cycle_end += 1
+                }
+                while cycle_end < spc && self.data[ch + chs * cycle_end] <= 0. {
+                    cycle_end += 1
+                }
+
+                let buffer_len = cycle_end - cycle_beg;
+                buffer.resize(buffer_len, 0.);
+
+                for i in 0..buffer_len {
+                    buffer[i] = self.data[ch + (cycle_beg + i) * chs];
+                }
+
+                for i in 0..buffer_len {
+                    self.data[ch + (cycle_beg + i) * chs] = buffer[buffer_len - i - 1];
+                }
+
+                cycle_beg = cycle_end;
+            }
+        }
+
         self
     }
 }

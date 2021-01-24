@@ -1,10 +1,12 @@
-use std::io::Read;
 use std::io;
+use std::io::Read;
 
 use crate::types::*;
 
 pub fn read_wav<R: Read>(reader: &mut R) -> Result<AudioBuffer, io::Error>
-where R: Read {
+where
+    R: Read,
+{
     WavReader::new(reader).read()
 }
 
@@ -45,9 +47,13 @@ impl<R: Read> ReadByte for R {
     }
 }
 
-impl<R:Read> WavReader<R> {
+impl<R: Read> WavReader<R> {
     fn new(reader: R) -> Self {
-        Self { reader, bit_depth: 32, format: WavFormat::FLOAT }
+        Self {
+            reader,
+            bit_depth: 32,
+            format: WavFormat::FLOAT,
+        }
     }
 
     fn read(mut self) -> Result<AudioBuffer, io::Error> {
@@ -69,7 +75,10 @@ impl<R:Read> WavReader<R> {
     }
 }
 
-fn read_data<R: Read>(mut wr: WavReader<R>, audio_buffer: &mut AudioBuffer) -> Result<&AudioBuffer, io::Error> {
+fn read_data<R: Read>(
+    mut wr: WavReader<R>,
+    audio_buffer: &mut AudioBuffer,
+) -> Result<&AudioBuffer, io::Error> {
     let length = wr.reader.read_u32()? as usize;
 
     let mut v = Vec::with_capacity(length);
@@ -81,7 +90,9 @@ fn read_data<R: Read>(mut wr: WavReader<R>, audio_buffer: &mut AudioBuffer) -> R
             }
             audio_buffer.data = v
                 .chunks_exact(4)
-                .map(|chunks| f32::from_le_bytes([chunks[0], chunks[1], chunks[2], chunks[3]]) as f32)
+                .map(|chunks| {
+                    f32::from_le_bytes([chunks[0], chunks[1], chunks[2], chunks[3]]) as f32
+                })
                 .collect();
             Ok(audio_buffer)
         }
@@ -91,10 +102,11 @@ fn read_data<R: Read>(mut wr: WavReader<R>, audio_buffer: &mut AudioBuffer) -> R
                     audio_buffer.data = v
                         .chunks_exact(2)
                         .map(|chunks| {
-                            f32::from(i16::from_le_bytes([chunks[0], chunks[1]])) / f32::from(i16::max_value())
+                            f32::from(i16::from_le_bytes([chunks[0], chunks[1]]))
+                                / f32::from(i16::max_value())
                         })
                         .collect();
-                    },
+                }
                 24 => {
                     audio_buffer.data = v
                         .chunks_exact(3)
@@ -103,7 +115,7 @@ fn read_data<R: Read>(mut wr: WavReader<R>, audio_buffer: &mut AudioBuffer) -> R
                             (i32::from_le_bytes(arr)) as f32 / i32::max_value() as f32
                         })
                         .collect();
-                },
+                }
                 _ => panic!("{} bit not supported", wr.bit_depth),
             }
             Ok(audio_buffer)
@@ -112,7 +124,10 @@ fn read_data<R: Read>(mut wr: WavReader<R>, audio_buffer: &mut AudioBuffer) -> R
 }
 
 fn read_chunks<R: Read>(reader: R) -> Result<AudioBuffer, io::Error> {
-    fn _read_chunks<R: Read>(mut wr: WavReader<R>, audio_buffer: &mut AudioBuffer) -> Result<&AudioBuffer, io::Error> {
+    fn _read_chunks<R: Read>(
+        mut wr: WavReader<R>,
+        audio_buffer: &mut AudioBuffer,
+    ) -> Result<&AudioBuffer, io::Error> {
         let mut buf = [0_u8; 4];
         wr.reader.read_exact(&mut buf)?;
         match &buf {
@@ -137,8 +152,10 @@ fn read_chunks<R: Read>(reader: R) -> Result<AudioBuffer, io::Error> {
             }
             b"data" => read_data(wr, audio_buffer),
             tag => {
-                eprintln!("unknown chunk {}",
-                          std::str::from_utf8(tag).unwrap_or("which can't be printed"));
+                eprintln!(
+                    "unknown chunk {}",
+                    std::str::from_utf8(tag).unwrap_or("which can't be printed")
+                );
                 let chunk_size = wr.reader.read_u32()?;
                 wr.reader.skip_bytes(u64::from(chunk_size));
                 _read_chunks(wr, audio_buffer)

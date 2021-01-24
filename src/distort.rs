@@ -27,7 +27,11 @@ impl Distort for AudioBuffer {
 
     fn hard_clip(mut self, thresh: f32) -> Self {
         for s in &mut self.data {
-            *s = if s.abs() > thresh { thresh * s.signum() } else { *s }
+            *s = if s.abs() > thresh {
+                thresh * s.signum()
+            } else {
+                *s
+            }
         }
         self
     }
@@ -48,13 +52,18 @@ impl Distort for AudioBuffer {
             let mut cycle_beg = 0;
             while i < spc {
                 // go over the next pseudo-cycle
-                while i < spc && self.data[ch + chs * i] >= 0. { i += 1 }
-                while i < spc && self.data[ch + chs * i] <= 0. { i += 1 }
+                while i < spc && self.data[ch + chs * i] >= 0. {
+                    i += 1
+                }
+                while i < spc && self.data[ch + chs * i] <= 0. {
+                    i += 1
+                }
 
                 for current_depth in 1..=depth as usize {
                     let fractal_len = (i - cycle_beg) / current_depth;
                     for j in 0..fractal_len {
-                        let value = self.data[ch + chs * (cycle_beg + current_depth * j)] / depth as f32;
+                        let value =
+                            self.data[ch + chs * (cycle_beg + current_depth * j)] / depth as f32;
                         for cycle in 0..current_depth {
                             new_data[ch + chs * (cycle_beg + j + cycle * fractal_len)] += value
                         }
@@ -63,7 +72,10 @@ impl Distort for AudioBuffer {
                 cycle_beg = i;
             }
         }
-        Self { metadata: self.metadata.clone(), data: new_data }
+        Self {
+            metadata: self.metadata.clone(),
+            data: new_data,
+        }
     }
 
     fn interpolate(&self) -> Self {
@@ -83,8 +95,12 @@ impl Distort for AudioBuffer {
             let mut cycle_beg = 0;
             while cycle_end < spc {
                 // go over the next pseudo-cycle
-                while cycle_end < spc && self.data[ch + chs * cycle_end] >= 0. { cycle_end += 1 }
-                while cycle_end < spc && self.data[ch + chs * cycle_end] <= 0. { cycle_end += 1 }
+                while cycle_end < spc && self.data[ch + chs * cycle_end] >= 0. {
+                    cycle_end += 1
+                }
+                while cycle_end < spc && self.data[ch + chs * cycle_end] <= 0. {
+                    cycle_end += 1
+                }
 
                 let mut max = 0.;
                 for i in cycle_beg..cycle_end {
@@ -110,8 +126,14 @@ fn interpolate_channel(channel: &[f32]) -> Vec<f32> {
     let mut i = 0;
 
     // skip the first pseudo cycle
-    while i < channel.len() && channel[i] >= 0. { out.push(channel[i]); i += 1 }
-    while i < channel.len() && channel[i] <= 0. { out.push(channel[i]); i += 1 }
+    while i < channel.len() && channel[i] >= 0. {
+        out.push(channel[i]);
+        i += 1
+    }
+    while i < channel.len() && channel[i] <= 0. {
+        out.push(channel[i]);
+        i += 1
+    }
 
     let mut first_cycle_beg = 0;
     let mut first_cycle_end = i - 1;
@@ -119,8 +141,12 @@ fn interpolate_channel(channel: &[f32]) -> Vec<f32> {
 
     while i < channel.len() {
         // go over the next pseudo-cycle
-        while i < channel.len() && channel[i] >= 0. { i += 1 }
-        while i < channel.len() && channel[i] <= 0. { i += 1 }
+        while i < channel.len() && channel[i] >= 0. {
+            i += 1
+        }
+        while i < channel.len() && channel[i] <= 0. {
+            i += 1
+        }
 
         let second_cycle_end = i - 1;
 

@@ -31,7 +31,8 @@ impl Gain for AudioBuffer {
     }
 
     fn normalize(mut self) -> Self {
-        let max_amplitude = self.data
+        let max_amplitude = self
+            .data
             .iter()
             .map(|s| s.abs())
             .max_by(|x, y| x.partial_cmp(y).expect("Invalid NaN sample"));

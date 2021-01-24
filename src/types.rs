@@ -48,5 +48,11 @@ pub fn from_channels(channels: &[Vec<f32>], sample_rate: u32) -> AudioBuffer {
         }
     }
 
-    AudioBuffer { data, metadata: AudioMetadata { channels: chs as u16, sample_rate } }
+    AudioBuffer {
+        data,
+        metadata: AudioMetadata {
+            channels: chs as u16,
+            sample_rate,
+        },
+    }
 }

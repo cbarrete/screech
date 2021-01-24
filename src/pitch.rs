@@ -77,7 +77,7 @@ impl Pitch for AudioBuffer {
                     read += speed;
                 }
             }
-            self.data.resize(new_len, 0.0);
+            self.data.truncate(new_len);
             self.data.shrink_to_fit();
         } else {
             let mut buffer = vec![1.0; new_len];

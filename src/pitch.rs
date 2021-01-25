@@ -36,10 +36,8 @@ impl Pitch for AudioBuffer {
             let mut read: f32 = 0.0;
             let mut write = 0;
             for i in 0..samples_per_channel {
-                buffer[write] = self.data[channel + i * channels];
-
+                buffer[write & buffer_mask] = self.data[channel + i * channels];
                 write += 1;
-                write &= buffer_mask;
 
                 let first = read.floor();
                 let second = read.ceil();

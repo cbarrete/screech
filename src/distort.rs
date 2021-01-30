@@ -43,7 +43,7 @@ impl Distort for AudioBuffer {
 
     fn tense(mut self, tension: f32) -> Self {
         for s in &mut self.data {
-            *s = 1. - (1. - *s).powf(tension);
+            *s = s.signum() * (1. - (1. - s.abs()).powf(tension));
         }
         self
     }

@@ -150,7 +150,7 @@ fn do_main(
                 return Err(CliError::Arguments(String::from("dc takes a decimal dc")));
             }
             let dc = option_arguments[1].parse::<f32>()?;
-            audio_buffer = run(|ab: AudioBuffer| ab.dc(dc), audio_buffer, iterations);
+            audio_buffer = run(|ab: AudioBuffer| ab.add_dc(dc), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
         } else if "removedc".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.remove_dc();

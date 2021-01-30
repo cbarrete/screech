@@ -5,7 +5,7 @@ pub trait Distort {
     fn fold(self) -> Self;
     fn hard_clip(self, gain: f32) -> Self;
     fn soft_clip(self, amount: f32) -> Self;
-    fn waveshape_tension(self, tension: f32) -> Self;
+    fn tense(self, tension: f32) -> Self;
 }
 
 impl Distort for AudioBuffer {
@@ -41,7 +41,7 @@ impl Distort for AudioBuffer {
         self
     }
 
-    fn waveshape_tension(mut self, tension: f32) -> Self {
+    fn tense(mut self, tension: f32) -> Self {
         for s in &mut self.data {
             *s = 1. - (1. - *s).powf(tension);
         }

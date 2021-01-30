@@ -1,4 +1,4 @@
-use screech::{read_wav, write_wav, AudioBuffer, Distort, Gain, Pitch};
+use screech::{read_wav, write_wav, AudioBuffer, Distort, Gain, Pitch, PseudoCycle};
 use std::env::args;
 use std::fs::File;
 use std::process::exit;

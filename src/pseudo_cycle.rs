@@ -5,6 +5,7 @@ pub trait PseudoCycle {
     fn interpolate(&self) -> Self;
     fn expand(self) -> Self;
     fn reverse_pseudo_cycles(self) -> Self;
+    fn tense_pseudo_cycles(self, tension: f32) -> Self;
 }
 
 impl PseudoCycle for AudioBuffer {
@@ -118,7 +119,52 @@ impl PseudoCycle for AudioBuffer {
                 cycle_beg = cycle_end;
             }
         }
+        self
+    }
 
+    fn tense_pseudo_cycles(mut self, tension: f32) -> Self {
+        let chs = self.metadata.channels as usize;
+        let spc = self.data.len() / chs;
+
+        for ch in 0..chs {
+            let mut cycle_end = 0;
+            let mut cycle_beg = 0;
+
+            while cycle_end < spc {
+                let mut max = 0.;
+                // go over the next pseudo-cycle
+                while cycle_end < spc {
+                    let sample = self.data[ch + chs * cycle_end];
+                    if sample < 0. {
+                        break;
+                    }
+                    let current_amp = sample.abs();
+                    if current_amp > max {
+                        max = current_amp;
+                    }
+                    cycle_end += 1
+                }
+                while cycle_end < spc && self.data[ch + chs * cycle_end] <= 0. {
+                    let sample = self.data[ch + chs * cycle_end];
+                    if sample > 0. {
+                        break;
+                    }
+                    let current_amp = sample.abs();
+                    if current_amp > max {
+                        max = current_amp;
+                    }
+                    cycle_end += 1
+                }
+
+                for i in cycle_beg..cycle_end {
+                    let sample = self.data[ch + chs * i];
+                    self.data[ch + chs * i] =
+                        sample.signum() * max * (1. - (1. - sample.abs() / max).powf(tension));
+                }
+
+                cycle_beg = cycle_end;
+            }
+        }
         self
     }
 }

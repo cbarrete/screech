@@ -46,6 +46,7 @@ fn do_main(
     mut option_arguments: &[String],
 ) -> Result<(), CliError> {
     let mut audio_buffer = read_wav(&mut File::open(in_filename)?)?;
+
     while !option_arguments.is_empty() {
         let iterations = match option_arguments[0].parse::<u32>() {
             Ok(i) => {
@@ -54,10 +55,10 @@ fn do_main(
             }
             Err(_) => 1,
         };
-        if "-interpolate".starts_with(&option_arguments[0]) {
+        if "interpolate".starts_with(&option_arguments[0]) {
             audio_buffer = run(|ab: AudioBuffer| ab.interpolate(), audio_buffer, iterations);
             option_arguments = &option_arguments[1..];
-        } else if "-fractalize".starts_with(&option_arguments[0]) {
+        } else if "fractalize".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
                     "fractalize takes an integral depth",
@@ -70,20 +71,20 @@ fn do_main(
                 iterations,
             );
             option_arguments = &option_arguments[2..];
-        } else if "-expand".starts_with(&option_arguments[0]) {
+        } else if "expand".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.expand();
             option_arguments = &option_arguments[1..];
-        } else if "-reversepseudocycles".starts_with(&option_arguments[0]) {
+        } else if "reversepseudocycles".starts_with(&option_arguments[0]) {
             audio_buffer = run(
                 |ab: AudioBuffer| ab.reverse_pseudo_cycles(),
                 audio_buffer,
                 iterations,
             );
             option_arguments = &option_arguments[1..];
-        } else if "-fold".starts_with(&option_arguments[0]) {
+        } else if "fold".starts_with(&option_arguments[0]) {
             audio_buffer = run(|ab: AudioBuffer| ab.fold(), audio_buffer, iterations);
             option_arguments = &option_arguments[1..];
-        } else if "-hardclip".starts_with(&option_arguments[0]) {
+        } else if "hardclip".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
                     "hardclip takes a decimal threshold",
@@ -91,7 +92,7 @@ fn do_main(
             }
             audio_buffer = audio_buffer.hard_clip(option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
-        } else if "-softclip".starts_with(&option_arguments[0]) {
+        } else if "softclip".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
                     "softclip takes a decimal amount",
@@ -104,7 +105,7 @@ fn do_main(
                 iterations,
             );
             option_arguments = &option_arguments[2..];
-        } else if "-decimate".starts_with(&option_arguments[0]) {
+        } else if "decimate".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
                     "decimate takes a decimal depth",
@@ -112,7 +113,7 @@ fn do_main(
             }
             audio_buffer = audio_buffer.decimate(option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
-        } else if "-delaypitch".starts_with(&option_arguments[0]) {
+        } else if "delaypitch".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 3 {
                 return Err(CliError::Arguments(String::from(
                     "delaypitch takes a decimal factor and an integer size",
@@ -126,7 +127,7 @@ fn do_main(
                 iterations,
             );
             option_arguments = &option_arguments[3..];
-        } else if "-speed".starts_with(&option_arguments[0]) {
+        } else if "speed".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
                     "speed takes a decimal speed",
@@ -135,7 +136,7 @@ fn do_main(
             let speed = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.speed(speed), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
-        } else if "-gain".starts_with(&option_arguments[0]) {
+        } else if "gain".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
                     "gain takes a decimal gain",
@@ -144,17 +145,17 @@ fn do_main(
             let gain = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.gain(gain), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
-        } else if "-dc".starts_with(&option_arguments[0]) {
+        } else if "dc".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from("dc takes a decimal dc")));
             }
             let dc = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(|ab: AudioBuffer| ab.dc(dc), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
-        } else if "-removedc".starts_with(&option_arguments[0]) {
+        } else if "removedc".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.remove_dc();
             option_arguments = &option_arguments[1..];
-        } else if "-normalize".starts_with(&option_arguments[0]) {
+        } else if "normalize".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.normalize();
             option_arguments = &option_arguments[1..];
         } else {
@@ -169,20 +170,20 @@ fn do_main(
 
 static USAGE: &str = "usage: screech input_file [[iterations] option]... output_file
 available options:
-  -interpolate
-  -fractalize <depth>
-  -expand
-  -reversepseudocycles
-  -fold
-  -hardclip <threshold>
-  -softclip <amount>
-  -decimate <depth>
-  -delaypitch <factor> <size>
-  -speed <speed>
-  -gain <gain>
-  -dc <dc>
-  -removedc
-  -normalize
+  interpolate
+  fractalize <depth>
+  expand
+  reversepseudocycles
+  fold
+  hardclip <threshold>
+  softclip <amount>
+  decimate <depth>
+  delaypitch <factor> <size>
+  speed <speed>
+  gain <gain>
+  dc <dc>
+  removedc
+  normalize
 
 short versions are tried in that order";
 

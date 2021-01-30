@@ -13,19 +13,19 @@ impl PseudoCycle for AudioBuffer {
         let chs = self.metadata.channels as usize;
         let spc = self.data.len() / chs;
         for ch in 0..chs {
-            let mut i = 0;
+            let mut cycle_end = 0;
             let mut cycle_beg = 0;
-            while i < spc {
+            while cycle_end < spc {
                 // go over the next pseudo-cycle
-                while i < spc && self.data[ch + chs * i] >= 0. {
-                    i += 1
+                while cycle_end < spc && self.data[ch + chs * cycle_end] >= 0. {
+                    cycle_end += 1
                 }
-                while i < spc && self.data[ch + chs * i] <= 0. {
-                    i += 1
+                while cycle_end < spc && self.data[ch + chs * cycle_end] <= 0. {
+                    cycle_end += 1
                 }
 
                 for current_depth in 1..=depth as usize {
-                    let fractal_len = (i - cycle_beg) / current_depth;
+                    let fractal_len = (cycle_end - cycle_beg) / current_depth;
                     for j in 0..fractal_len {
                         let value =
                             self.data[ch + chs * (cycle_beg + current_depth * j)] / depth as f32;
@@ -34,7 +34,7 @@ impl PseudoCycle for AudioBuffer {
                         }
                     }
                 }
-                cycle_beg = i;
+                cycle_beg = cycle_end;
             }
         }
         Self {

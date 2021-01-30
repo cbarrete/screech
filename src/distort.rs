@@ -9,6 +9,7 @@ pub trait Distort {
     fn interpolate(&self) -> Self;
     fn expand(self) -> Self;
     fn reverse_pseudo_cycles(self) -> Self;
+    fn waveshape_tension(self, tension: f32) -> Self;
 }
 
 impl Distort for AudioBuffer {
@@ -155,6 +156,13 @@ impl Distort for AudioBuffer {
             }
         }
 
+        self
+    }
+
+    fn waveshape_tension(mut self, tension: f32) -> Self {
+        for s in &mut self.data {
+            *s = 1. - (1. - *s).powf(tension);
+        }
         self
     }
 }

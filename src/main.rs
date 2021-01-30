@@ -105,6 +105,19 @@ fn do_main(
                 iterations,
             );
             option_arguments = &option_arguments[2..];
+        } else if "tensionwaveshape".starts_with(&option_arguments[0]) {
+            if option_arguments.len() < 2 {
+                return Err(CliError::Arguments(String::from(
+                    "tensionwaveshape takes a decimal tension",
+                )));
+            }
+            let tension = option_arguments[1].parse::<f32>()?;
+            audio_buffer = run(
+                |ab: AudioBuffer| ab.waveshape_tension(tension),
+                audio_buffer,
+                iterations,
+            );
+            option_arguments = &option_arguments[2..];
         } else if "decimate".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from(
@@ -177,6 +190,7 @@ available options:
   fold
   hardclip <threshold>
   softclip <amount>
+  tensionwaveshape
   decimate <depth>
   delaypitch <factor> <size>
   speed <speed>

@@ -190,7 +190,7 @@ available options:
   fold
   hardclip <threshold>
   softclip <amount>
-  tense
+  tense <tension>
   decimate <depth>
   delaypitch <factor> <size>
   speed <speed>

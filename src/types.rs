@@ -56,3 +56,52 @@ pub fn from_channels(channels: &[Vec<f32>], sample_rate: u32) -> AudioBuffer {
         },
     }
 }
+
+#[derive(Clone, Copy)]
+pub(crate) struct Complex {
+    pub r: f32,
+    pub i: f32,
+}
+
+impl Complex {
+    pub fn zero() -> Self {
+        Self { r: 0., i: 0. }
+    }
+
+    pub fn new(r: f32, i: f32) -> Self {
+        Self { r, i }
+    }
+}
+
+impl std::ops::Mul<Complex> for Complex {
+    type Output = Self;
+
+    fn mul(self, rhs: Complex) -> Self::Output {
+        Self::Output {
+            r: self.r * rhs.r + self.i * rhs.i, // ac - bd
+            i: self.r * rhs.i + self.r * rhs.i, // ad + bc
+        }
+    }
+}
+
+impl std::ops::Add<f32> for Complex {
+    type Output = Complex;
+
+    fn add(self, rhs: f32) -> Self::Output {
+        Self::Output {
+            r: self.r + rhs,
+            i: self.i,
+        }
+    }
+}
+
+impl std::ops::Mul<Complex> for f32 {
+    type Output = Complex;
+
+    fn mul(self, rhs: Complex) -> Self::Output {
+        Self::Output {
+            r: self * rhs.r,
+            i: self * rhs.i,
+        }
+    }
+}

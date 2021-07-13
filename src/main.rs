@@ -1,4 +1,4 @@
-use screech::{read_wav, write_wav, AudioBuffer, Distort, Gain, Pitch, PseudoCycle};
+use screech::{read_wav, write_wav, AudioBuffer, Distort, Gain, Phase, Pitch, PseudoCycle};
 use std::env::args;
 use std::fs::File;
 use std::process::exit;
@@ -184,6 +184,21 @@ fn do_main(
         } else if "normalize".starts_with(&option_arguments[0]) {
             audio_buffer = audio_buffer.normalize();
             option_arguments = &option_arguments[1..];
+        } else if "rotate".starts_with(&option_arguments[0]) {
+            if option_arguments.len() < 4 {
+                return Err(CliError::Arguments(String::from(
+                    "rotate takes a delay, feedback and frequency",
+                )));
+            }
+            let delay = option_arguments[1].parse::<usize>()?;
+            let feedback = option_arguments[2].parse::<f32>()?;
+            let frequency = option_arguments[3].parse::<f32>()?;
+            audio_buffer = run(
+                |ab: AudioBuffer| ab.rotate(delay, feedback, frequency),
+                audio_buffer,
+                iterations,
+            );
+            option_arguments = &option_arguments[4..];
         } else {
             return Err(CliError::Arguments(format!(
                 "Unknown option {}",

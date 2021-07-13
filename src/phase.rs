@@ -3,12 +3,12 @@ use std::f32::consts::PI;
 use crate::types::*;
 
 pub trait Phase {
-    fn rotate(self, delay: usize, feedback: f32, frequency: f32) -> Self;
+    fn delay_rotate(self, delay: usize, feedback: f32, frequency: f32) -> Self;
 }
 
 impl Phase for AudioBuffer {
     // TODO log size and ring buffer instead of delay
-    fn rotate(mut self, delay: usize, feedback: f32, frequency: f32) -> Self {
+    fn delay_rotate(mut self, delay: usize, feedback: f32, frequency: f32) -> Self {
         let mut delay_buffer = Vec::with_capacity(delay);
         delay_buffer.resize(delay, Complex::zero());
         let lfo_step = 2. * PI * frequency / self.metadata.sample_rate as f32;

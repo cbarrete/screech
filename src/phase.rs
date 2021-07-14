@@ -7,7 +7,6 @@ pub trait Phase {
 }
 
 impl Phase for AudioBuffer {
-    // TODO log size and ring buffer instead of delay
     fn delay_rotate(mut self, delay: usize, feedback: f32, frequency: f32) -> Self {
         let mut delay_buffer = Vec::with_capacity(delay);
         delay_buffer.resize(delay, Complex::zero());

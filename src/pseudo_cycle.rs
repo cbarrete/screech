@@ -45,12 +45,58 @@ impl PseudoCycle for AudioBuffer {
     }
 
     fn interpolate(&self) -> Self {
-        let frac_chans: Vec<Vec<f32>> = self
-            .get_channels()
-            .iter()
-            .map(|c| interpolate_channel(c))
-            .collect();
-        from_channels(&frac_chans, self.metadata.sample_rate)
+        let mut new_data = vec![0.; self.data.len()];
+        let chs = self.metadata.channels as usize;
+        let spc = self.data.len() / chs;
+
+        for ch in 0..chs {
+            let mut i = 0;
+            // skip the first pseudo cycle
+            while i < spc && self.data[ch + chs * i] >= 0. {
+                new_data[ch + chs * i] = self.data[ch + chs * i];
+                i += 1;
+            }
+            while i < spc && self.data[ch + chs * i] <= 0. {
+                new_data[ch + chs * i] = self.data[ch + chs * i];
+                i += 1;
+            }
+
+            let mut first_cycle_beg = 0;
+            let mut first_cycle_end = i - 1;
+            let mut second_cycle_beg = i;
+
+            let mut write = i;
+            while i < spc {
+                // go over the next pseudo-cycle
+                while i < spc && self.data[ch + chs * i] >= 0. {
+                    i += 1
+                }
+                while i < spc && self.data[ch + chs * i] <= 0. {
+                    i += 1
+                }
+
+                let second_cycle_end = i - 1;
+
+                let first_cycle_len = 1 + first_cycle_end - first_cycle_beg;
+                let second_cycle_len = 1 + second_cycle_end - second_cycle_beg;
+                let ratio = first_cycle_len as f32 / second_cycle_len as f32;
+                for j in 0..second_cycle_len {
+                    let f = self.data[ch + chs * (first_cycle_beg + (ratio * j as f32) as usize)];
+                    let s = self.data[ch + chs * (second_cycle_beg + j)];
+                    new_data[ch + chs * write] = (f + s) / 2.;
+                    write += 1;
+                }
+
+                first_cycle_beg = second_cycle_beg;
+                first_cycle_end = second_cycle_end;
+                second_cycle_beg = first_cycle_end + 1;
+            }
+        }
+
+        Self {
+            metadata: self.metadata.clone(),
+            data: new_data,
+        }
     }
 
     fn expand(mut self) -> Self {
@@ -167,51 +213,4 @@ impl PseudoCycle for AudioBuffer {
         }
         self
     }
-}
-
-fn interpolate_channel(channel: &[f32]) -> Vec<f32> {
-    let mut out = Vec::with_capacity(channel.len());
-    let mut i = 0;
-
-    // skip the first pseudo cycle
-    while i < channel.len() && channel[i] >= 0. {
-        out.push(channel[i]);
-        i += 1
-    }
-    while i < channel.len() && channel[i] <= 0. {
-        out.push(channel[i]);
-        i += 1
-    }
-
-    let mut first_cycle_beg = 0;
-    let mut first_cycle_end = i - 1;
-    let mut second_cycle_beg = i;
-
-    while i < channel.len() {
-        // go over the next pseudo-cycle
-        while i < channel.len() && channel[i] >= 0. {
-            i += 1
-        }
-        while i < channel.len() && channel[i] <= 0. {
-            i += 1
-        }
-
-        let second_cycle_end = i - 1;
-
-        let first_cycle_len = 1 + first_cycle_end - first_cycle_beg;
-        let second_cycle_len = 1 + second_cycle_end - second_cycle_beg;
-        let ratio = first_cycle_len as f32 / second_cycle_len as f32;
-        for j in 0..second_cycle_len {
-            let f = channel[first_cycle_beg + (ratio * j as f32) as usize];
-            let s = channel[second_cycle_beg + j];
-            out.push((f + s) / 2.)
-        }
-
-        first_cycle_beg = second_cycle_beg;
-        first_cycle_end = second_cycle_end;
-        second_cycle_beg = first_cycle_end + 1;
-    }
-
-    out.shrink_to_fit();
-    out
 }

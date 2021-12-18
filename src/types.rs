@@ -36,27 +36,6 @@ impl AudioBuffer {
     }
 }
 
-pub fn from_channels(channels: &[Vec<f32>], sample_rate: u32) -> AudioBuffer {
-    let chs = channels.len();
-    let size: usize = channels.iter().map(Vec::len).sum();
-    let spc = channels.iter().map(Vec::len).min().unwrap_or(0);
-
-    let mut data = Vec::with_capacity(size);
-    for s in 0..spc {
-        for c in 0..chs {
-            data.push(channels[c][s]);
-        }
-    }
-
-    AudioBuffer {
-        data,
-        metadata: AudioMetadata {
-            channels: chs as u16,
-            sample_rate,
-        },
-    }
-}
-
 #[derive(Clone, Copy)]
 pub(crate) struct Complex {
     pub r: f32,

@@ -201,8 +201,8 @@ fn do_main(
             option_arguments = &option_arguments[1..];
         } else {
             return Err(CliError::Arguments(format!(
-                "Unknown option {}",
-                option_arguments[0]
+                "Unknown option {}\n{}",
+                option_arguments[0], USAGE,
             )));
         }
     }

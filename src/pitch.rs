@@ -7,7 +7,7 @@ pub trait Pitch {
 
 impl Pitch for AudioBuffer {
     fn delay_pitch(mut self, factor: f32, log_size: u8) -> Self {
-        if factor == 1.0 {
+        if factor == 1. {
             return self;
         }
 
@@ -23,17 +23,17 @@ impl Pitch for AudioBuffer {
         let buffer_size =
             std::cmp::min(2usize.pow(log_size as u32), data_len_bounded_size) / channels;
         let buffer_mask = buffer_size - 1;
-        let mut buffer = vec![0.0; buffer_size];
+        let mut buffer = vec![0.; buffer_size];
 
         for channel in 0..channels {
-            if factor > 1.0 {
+            if factor > 1. {
                 // initialize the buffer to avoid initial silence
                 for i in 0..buffer.len() {
                     buffer[i] = self.data[channel + i * channels];
                 }
             }
 
-            let mut read: f32 = 0.0;
+            let mut read: f32 = 0.;
             let mut write = 0;
             for i in 0..samples_per_channel {
                 buffer[write & buffer_mask] = self.data[channel + i * channels];
@@ -43,7 +43,7 @@ impl Pitch for AudioBuffer {
                 let second = read.ceil();
                 let ratio = read - first;
                 self.data[channel + i * channels] = buffer[first as usize] * ratio
-                    + buffer[second as usize & buffer_mask] * (1.0 - ratio);
+                    + buffer[second as usize & buffer_mask] * (1. - ratio);
 
                 read += factor;
 
@@ -57,7 +57,7 @@ impl Pitch for AudioBuffer {
     }
 
     fn speed(mut self, speed: f32) -> Self {
-        if speed == 1.0 {
+        if speed == 1. {
             return self;
         }
 
@@ -65,30 +65,30 @@ impl Pitch for AudioBuffer {
         let new_len = (self.data.len() as f32 / speed) as usize;
         let samples_per_channel = new_len / chs;
 
-        if speed > 1.0 {
+        if speed > 1. {
             for ch in 0..chs {
-                let mut read: f32 = 0.0;
+                let mut read: f32 = 0.;
                 for i in 0..samples_per_channel {
                     let first = read.floor();
                     let second = read.ceil();
                     let ratio = read - first;
                     self.data[ch + i * chs] = self.data[ch + first as usize * chs] * ratio
-                        + self.data[ch + second as usize * chs] * (1.0 - ratio);
+                        + self.data[ch + second as usize * chs] * (1. - ratio);
                     read += speed;
                 }
             }
             self.data.truncate(new_len);
             self.data.shrink_to_fit();
         } else {
-            let mut buffer = vec![1.0; new_len];
+            let mut buffer = vec![1.; new_len];
             for ch in 0..chs {
-                let mut read: f32 = 0.0;
+                let mut read: f32 = 0.;
                 for i in 0..samples_per_channel {
                     let first = read.floor();
                     let second = read.ceil();
                     let ratio = read - first;
                     buffer[ch + i * chs] = self.data[ch + first as usize * chs] * ratio
-                        + self.data[ch + second as usize * chs] * (1.0 - ratio);
+                        + self.data[ch + second as usize * chs] * (1. - ratio);
                     read += speed;
                 }
             }

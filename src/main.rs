@@ -1,4 +1,5 @@
-use screech::{read_wav, write_wav, AudioBuffer, Distort, Gain, Phase, Pitch, PseudoCycle};
+use screech::pseudo_cycle::*;
+use screech::{read_wav, write_wav, AudioBuffer, Distort, Gain, Phase, Pitch};
 use std::env::args;
 use std::fs::File;
 use std::process::exit;
@@ -56,7 +57,7 @@ fn do_main(
             Err(_) => 1,
         };
         if "interpolate".starts_with(&option_arguments[0]) {
-            audio_buffer = run(|ab: AudioBuffer| ab.interpolate(), audio_buffer, iterations);
+            audio_buffer = run(|ab: AudioBuffer| interpolate(&ab), audio_buffer, iterations);
             option_arguments = &option_arguments[1..];
         } else if "fractalize".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
@@ -66,17 +67,17 @@ fn do_main(
             }
             let depth = option_arguments[1].parse::<u32>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| ab.fractalize(depth),
+                |ab: AudioBuffer| fractalize(&ab, depth),
                 audio_buffer,
                 iterations,
             );
             option_arguments = &option_arguments[2..];
         } else if "expand".starts_with(&option_arguments[0]) {
-            audio_buffer = audio_buffer.expand();
+            audio_buffer = expand(audio_buffer);
             option_arguments = &option_arguments[1..];
         } else if "reversepseudocycles".starts_with(&option_arguments[0]) {
             audio_buffer = run(
-                |ab: AudioBuffer| ab.reverse_pseudo_cycles(),
+                |ab: AudioBuffer| reverse_pseudo_cycles(ab),
                 audio_buffer,
                 iterations,
             );
@@ -126,7 +127,7 @@ fn do_main(
             }
             let tension = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| ab.tense_pseudo_cycles(tension),
+                |ab: AudioBuffer| tense_pseudo_cycles(ab, tension),
                 audio_buffer,
                 iterations,
             );

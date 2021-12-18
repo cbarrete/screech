@@ -1,6 +1,10 @@
+use screech::distort::*;
+use screech::gain::*;
 use screech::io::*;
+use screech::phase::*;
+use screech::pitch::*;
 use screech::pseudo_cycle::*;
-use screech::{AudioBuffer, Distort, Gain, Phase, Pitch};
+use screech::types::AudioBuffer;
 use std::env::args;
 use std::fs::File;
 use std::process::exit;
@@ -84,7 +88,7 @@ fn do_main(
             );
             option_arguments = &option_arguments[1..];
         } else if "fold".starts_with(&option_arguments[0]) {
-            audio_buffer = run(|ab: AudioBuffer| ab.fold(), audio_buffer, iterations);
+            audio_buffer = run(|ab: AudioBuffer| fold(ab), audio_buffer, iterations);
             option_arguments = &option_arguments[1..];
         } else if "hardclip".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
@@ -92,7 +96,7 @@ fn do_main(
                     "hardclip takes a decimal threshold",
                 )));
             }
-            audio_buffer = audio_buffer.hard_clip(option_arguments[1].parse::<f32>()?);
+            audio_buffer = hard_clip(audio_buffer, option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
         } else if "softclip".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
@@ -102,7 +106,7 @@ fn do_main(
             }
             let amount = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| ab.soft_clip(amount),
+                |ab: AudioBuffer| soft_clip(ab, amount),
                 audio_buffer,
                 iterations,
             );
@@ -115,7 +119,7 @@ fn do_main(
             }
             let tension = option_arguments[1].parse::<f32>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| ab.tense(tension),
+                |ab: AudioBuffer| tense(ab, tension),
                 audio_buffer,
                 iterations,
             );
@@ -139,7 +143,7 @@ fn do_main(
                     "decimate takes a decimal depth",
                 )));
             }
-            audio_buffer = audio_buffer.decimate(option_arguments[1].parse::<f32>()?);
+            audio_buffer = decimate(audio_buffer, option_arguments[1].parse::<f32>()?);
             option_arguments = &option_arguments[2..];
         } else if "delaypitch".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 3 {
@@ -165,7 +169,7 @@ fn do_main(
             let feedback = option_arguments[2].parse::<f32>()?;
             let frequency = option_arguments[3].parse::<f32>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| ab.delay_rotate(delay, feedback, frequency),
+                |ab: AudioBuffer| delay_rotate(ab, delay, feedback, frequency),
                 audio_buffer,
                 iterations,
             );
@@ -185,21 +189,21 @@ fn do_main(
                     "gain takes a decimal gain",
                 )));
             }
-            let gain = option_arguments[1].parse::<f32>()?;
-            audio_buffer = run(|ab: AudioBuffer| ab.gain(gain), audio_buffer, iterations);
+            let g = option_arguments[1].parse::<f32>()?;
+            audio_buffer = run(|ab: AudioBuffer| gain(ab, g), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
         } else if "dc".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {
                 return Err(CliError::Arguments(String::from("dc takes a decimal dc")));
             }
             let dc = option_arguments[1].parse::<f32>()?;
-            audio_buffer = run(|ab: AudioBuffer| ab.add_dc(dc), audio_buffer, iterations);
+            audio_buffer = run(|ab: AudioBuffer| add_dc(ab, dc), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
         } else if "removedc".starts_with(&option_arguments[0]) {
-            audio_buffer = audio_buffer.remove_dc();
+            audio_buffer = remove_dc(audio_buffer);
             option_arguments = &option_arguments[1..];
         } else if "normalize".starts_with(&option_arguments[0]) {
-            audio_buffer = audio_buffer.normalize();
+            audio_buffer = normalize(audio_buffer);
             option_arguments = &option_arguments[1..];
         } else {
             return Err(CliError::Arguments(format!(

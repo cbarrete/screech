@@ -1,50 +1,40 @@
-use crate::types::*;
+use crate::types::AudioBuffer;
 
-pub trait Distort {
-    fn decimate(self, depth: f32) -> Self;
-    fn fold(self) -> Self;
-    fn hard_clip(self, gain: f32) -> Self;
-    fn soft_clip(self, amount: f32) -> Self;
-    fn tense(self, tension: f32) -> Self;
+pub fn decimate(mut audio: AudioBuffer, depth: f32) -> AudioBuffer {
+    for s in &mut audio.data {
+        *s = (*s * depth).round() / depth;
+    }
+    audio
 }
 
-impl Distort for AudioBuffer {
-    fn decimate(mut self, depth: f32) -> Self {
-        for s in &mut self.data {
-            *s = (*s * depth).round() / depth;
-        }
-        self
+pub fn fold(mut audio: AudioBuffer) -> AudioBuffer {
+    for s in &mut audio.data {
+        *s = s.sin();
     }
+    audio
+}
 
-    fn fold(mut self) -> Self {
-        for s in &mut self.data {
-            *s = s.sin();
+pub fn hard_clip(mut audio: AudioBuffer, thresh: f32) -> AudioBuffer {
+    for s in &mut audio.data {
+        *s = if s.abs() > thresh {
+            thresh * s.signum()
+        } else {
+            *s
         }
-        self
     }
+    audio
+}
 
-    fn hard_clip(mut self, thresh: f32) -> Self {
-        for s in &mut self.data {
-            *s = if s.abs() > thresh {
-                thresh * s.signum()
-            } else {
-                *s
-            }
-        }
-        self
+pub fn soft_clip(mut audio: AudioBuffer, amount: f32) -> AudioBuffer {
+    for s in &mut audio.data {
+        *s -= amount * s.powi(3) / 3.;
     }
+    audio
+}
 
-    fn soft_clip(mut self, amount: f32) -> Self {
-        for s in &mut self.data {
-            *s -= amount * s.powi(3) / 3.;
-        }
-        self
+pub fn tense(mut audio: AudioBuffer, tension: f32) -> AudioBuffer {
+    for s in &mut audio.data {
+        *s = s.signum() * (1. - (1. - s.abs()).powf(tension));
     }
-
-    fn tense(mut self, tension: f32) -> Self {
-        for s in &mut self.data {
-            *s = s.signum() * (1. - (1. - s.abs()).powf(tension));
-        }
-        self
-    }
+    audio
 }

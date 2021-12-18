@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::types::AudioBuffer;
 
 pub fn fractalize(buffer: &AudioBuffer, depth: u32) -> AudioBuffer {
     let mut new_data = vec![0.; buffer.data.len()];

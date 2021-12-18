@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::types::AudioBuffer;
 
 pub trait Pitch {
     fn delay_pitch(self, factor: f32, log_size: u8) -> Self;

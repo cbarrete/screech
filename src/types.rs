@@ -21,19 +21,6 @@ impl AudioBuffer {
     pub fn file_size(&self) -> u32 {
         4 + 20 + 8 + 4 * self.data.len() as u32
     }
-
-    pub fn get_channels(&self) -> Vec<Vec<f32>> {
-        let n_channels = self.metadata.channels as usize;
-        let mut channels = Vec::with_capacity(n_channels);
-        for _ in 0..n_channels {
-            channels.push(Vec::with_capacity(self.data.len() / n_channels));
-        }
-
-        for (i, sample) in self.data.iter().enumerate() {
-            channels[(i % n_channels)].push(*sample);
-        }
-        channels
-    }
 }
 
 #[derive(Clone, Copy)]

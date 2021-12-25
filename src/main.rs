@@ -154,7 +154,7 @@ fn do_main(
             let factor = option_arguments[1].parse::<f32>()?;
             let size = option_arguments[2].parse::<u8>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| ab.delay_pitch(factor, size),
+                |ab: AudioBuffer| delay_pitch(ab, factor, size),
                 audio_buffer,
                 iterations,
             );
@@ -180,8 +180,8 @@ fn do_main(
                     "speed takes a decimal speed",
                 )));
             }
-            let speed = option_arguments[1].parse::<f32>()?;
-            audio_buffer = run(|ab: AudioBuffer| ab.speed(speed), audio_buffer, iterations);
+            let s = option_arguments[1].parse::<f32>()?;
+            audio_buffer = run(|ab: AudioBuffer| speed(ab, s), audio_buffer, iterations);
             option_arguments = &option_arguments[2..];
         } else if "gain".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 2 {

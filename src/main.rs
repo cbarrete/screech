@@ -215,7 +215,27 @@ fn do_main(
     write_wav(&mut File::create(out_filename)?, &audio_buffer).or_else(|e| Err(e.into()))
 }
 
-static USAGE: &str = "usage: screech input_file [[iterations] option]... output_file
+static OPTIONS: &str = "\
+interpolate
+fractalize <depth>
+expand
+reversepseudocycles
+fold
+hardclip <threshold>
+softclip <amount>
+tense <tension>
+tensepseudocycles <tension>
+decimate <depth>
+delaypitch <factor> <log_size>
+delayrotate <delay> <feedback> <frequency>
+speed <speed>
+gain <gain>
+dc <dc>
+removedc
+normalize";
+
+static USAGE: &str = "\
+usage: screech input_file [[iterations] option]... output_file
 available options:
   interpolate
   fractalize <depth>
@@ -239,8 +259,14 @@ short versions are tried in that order";
 
 fn main() {
     let args: Vec<String> = args().collect();
+
+    if args.len() == 2 && args[1] == "dump_options" {
+        println!("{OPTIONS}");
+        return;
+    }
+
     if args.len() < 3 {
-        eprintln!("{}", USAGE);
+        eprintln!("{USAGE}");
         exit(1);
     }
 

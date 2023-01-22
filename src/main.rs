@@ -148,13 +148,13 @@ fn do_main(
         } else if "delaypitch".starts_with(&option_arguments[0]) {
             if option_arguments.len() < 3 {
                 return Err(CliError::Arguments(String::from(
-                    "delaypitch takes a decimal factor and an integer size",
+                    "delaypitch takes a decimal factor and an integer log_size",
                 )));
             }
             let factor = option_arguments[1].parse::<f32>()?;
-            let size = option_arguments[2].parse::<u8>()?;
+            let log_size = option_arguments[2].parse::<u8>()?;
             audio_buffer = run(
-                |ab: AudioBuffer| delay_pitch(ab, factor, size),
+                |ab: AudioBuffer| delay_pitch(ab, factor, log_size),
                 audio_buffer,
                 iterations,
             );
@@ -227,7 +227,7 @@ available options:
   tense <tension>
   tensepseudocycles <tension>
   decimate <depth>
-  delaypitch <factor> <size>
+  delaypitch <factor> <log_size>
   delayrotate <delay> <feedback> <frequency>
   speed <speed>
   gain <gain>

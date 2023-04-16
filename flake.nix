@@ -1,20 +1,20 @@
 {
   outputs = { self, nixpkgs }: {
-    packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
+    packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ] (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
       screech = pkgs.rustPlatform.buildRustPackage {
         pname = "screech";
         version = "0.1.0";
-        src = ./.;
+        src = self;
         cargoLock.lockFile = ./Cargo.lock;
       };
 
       fzf_screech = pkgs.stdenvNoCC.mkDerivation {
         pname = "fzf_screech";
         version = "0.1.0";
-        src = ./.;
+        src = self;
         buildInputs = [ pkgs.python3 ];
         nativeBuildInputs = [ pkgs.makeWrapper ];
         installPhase = "mkdir -p $out/bin && cp fzf_screech $out/bin";
